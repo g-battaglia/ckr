@@ -1,0 +1,19 @@
+# .clang-format
+BasedOnStyle: LLVM
+IndentWidth: 4
+UseTab: Never
+TabWidth: 4
+ColumnLimit: 120
+AlignAfterOpenBracket: Align
+AllowAllParametersOfDeclarationOnNextLine: false
+BreakBeforeBraces: Attach
+BraceWrapping:
+  AfterFunction: false
+  AfterStruct: false
+  AfterClass: false
+  AfterControlStatement: false
+SpaceBeforeParens: ControlStatements
+SpaceBeforeCaseColon: true
+SpacesInParentheses: false
+KeepEmptyLinesAtTheStartOfBlocks: true
+
