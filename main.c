@@ -227,24 +227,27 @@ int main() {
     PlanetData planet;
 
     double tjd_ut = 2441184.0;                // Julian Day for 2000-01-01 12:00:00 UTC (J2000)
-    int planet_id = SE_MERCURY;               // Identifier for the Sun
     int iflags = SEFLG_SWIEPH | SEFLG_HELCTR; // Swiss Ephemeris + heliocentric coordinates
 
-    planet = *get_planet_data(planet_id, tjd_ut, iflags);
+    // For i from 0 to 23
+    for (int i = 0; i < 15; i++) {
+        // Get the planet data based on the planet ID, Julian Day, and flags
+        planet = *get_planet_data(i, tjd_ut, iflags);
 
-    printf("Planet Data:\n");
-
-    // Output the planet data in human-readable format
-    printf("Name: %s\n", planet.name);
-    printf("Quality: %s\n", planet.quality);
-    printf("Element: %s\n", planet.element);
-    printf("Sign: %s\n", planet.sign);
-    printf("Sign Number: %d\n", planet.sign_num);
-    printf("Position: %.15f\n", planet.pos);
-    printf("Absolute Position: %.15f\n", planet.abs_pos);
-    printf("Emoji: %s\n", planet.emoji);
-    printf("House: %s\n", planet.house);
-    printf("Retrograde: %s\n", planet.retrograde ? "True" : "False");
+        // Output the planet data in human-readable format
+        printf("Planet Data:\n");
+        printf("Name: %s\n", planet.name);
+        printf("Quality: %s\n", planet.quality);
+        printf("Element: %s\n", planet.element);
+        printf("Sign: %s\n", planet.sign);
+        printf("Sign Number: %d\n", planet.sign_num);
+        printf("Position: %.15f\n", planet.pos);
+        printf("Absolute Position: %.15f\n", planet.abs_pos);
+        printf("Emoji: %s\n", planet.emoji);
+        printf("House: %s\n", planet.house);
+        printf("Retrograde: %s\n", planet.retrograde ? "True" : "False");
+        printf("\n");
+    }
 
     // Close Swiss Ephemeris
     swe_close();
