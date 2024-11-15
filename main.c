@@ -16,6 +16,12 @@ typedef struct {
     int retrograde;
 } PlanetData;
 
+/**
+ * @brief Get the zodiac sign based on the position
+ *
+ * @param pos The position of the planet
+ * @return char* The zodiac sign
+ */
 char *get_sign(double pos) {
     // Array of zodiac signs
     static char *signs[] = {"Ari", "Tau", "Gem", "Can", "Leo", "Vir", "Lib", "Sco", "Sag", "Cap", "Aqu", "Pis"};
@@ -27,6 +33,12 @@ char *get_sign(double pos) {
     return signs[sign_num];
 }
 
+/**
+ * @brief Get the house number based on the position
+ *
+ * @param pos The position of the planet
+ * @return char* The house number
+ */
 char *get_house(double pos) {
     // Array of house numbers
     static char *houses[] = {"First_House", "Second_House", "Third_House",    "Fourth_House",
@@ -38,57 +50,85 @@ char *get_house(double pos) {
     return houses[house_num];
 }
 
+/**
+ * @brief Get the emoji based on the zodiac sign
+ *
+ * @param sign The zodiac sign
+ * @return char* The emoji
+ */
 char *get_emoji(char *sign) {
+    // Array of zodiac signs and their emojis
+    static char *signs[] = {"Ari", "Tau", "Gem", "Can", "Leo", "Vir", "Lib", "Sco", "Sag", "Cap", "Aqu", "Pis"};
+
     // Array of zodiac signs and their emojis
     static char *emojis[] = {"♈️", "♉️", "♊️", "♋️", "♌️", "♍️", "♎️", "♏️", "♐️", "♑️", "♒️", "♓️"};
 
     // Calculate the sign number
-    int sign_num = 0;
     for (int i = 0; i < 12; i++) {
-        if (strcmp(sign, emojis[i]) == 0) {
-            sign_num = i;
-            break;
+        if (strcmp(sign, signs[i]) == 0) {
+            return emojis[i];
         }
     }
 
-    // Return the emoji based on the sign number
-    return emojis[sign_num];
+    // Return NULL if the sign is not found
+    return NULL;
 }
 
+/**
+ * @brief Get the quality based on the zodiac sign
+ *
+ * @param sign The zodiac sign
+ * @return char* The quality
+ */
 char *get_quality(char *sign) {
-    // Array of zodiac signs and their qualities
-    static char *qualities[] = {"Cardinal", "Fixed", "Mutable"};
+    // Array of zodiac signs with three-letter words
+    static char *signs[] = {"Ari", "Tau", "Gem", "Can", "Leo", "Vir", "Lib", "Sco", "Sag", "Cap", "Aqu", "Pis"};
+
+    // Array of zodiac qualities
+    static char *qualities[] = {"Cardinal", "Fixed", "Mutable", "Cardinal", "Fixed", "Mutable",
+                                "Cardinal", "Fixed", "Mutable", "Cardinal", "Fixed", "Mutable"};
 
     // Calculate the sign number
-    int sign_num = 0;
     for (int i = 0; i < 12; i++) {
-        if (strcmp(sign, qualities[i]) == 0) {
-            sign_num = i;
-            break;
+        if (strcmp(sign, signs[i]) == 0) {
+            return qualities[i];
         }
     }
 
-    // Return the quality based on the sign number
-    return qualities[sign_num % 3];
+    // Return NULL if the sign is not found
+    return NULL;
 }
 
+/**
+ * @brief Get the element based on the zodiac sign
+ *
+ * @param sign The zodiac sign
+ * @return char* The element
+ */
 char *get_element(char *sign) {
+    static char *signs[] = {"Ari", "Tau", "Gem", "Can", "Leo", "Vir", "Lib", "Sco", "Sag", "Cap", "Aqu", "Pis"};
+
     // Array of zodiac signs and their elements
-    static char *elements[] = {"Fire", "Earth", "Air", "Water"};
+    static char *elements[] = {"Fire", "Earth", "Air",  "Water", "Fire", "Earth",
+                               "Air",  "Water", "Fire", "Earth", "Air",  "Water"};
 
     // Calculate the sign number
-    int sign_num = 0;
     for (int i = 0; i < 12; i++) {
-        if (strcmp(sign, elements[i]) == 0) {
-            sign_num = i;
-            break;
+        if (strcmp(sign, signs[i]) == 0) {
+            return elements[i];
         }
     }
 
-    // Return the element based on the sign number
-    return elements[sign_num % 4];
+    // Return NULL if the sign is not found
+    return NULL;
 }
 
+/**
+ * @brief Get the sign number based on the zodiac sign
+ *
+ * @param sign The zodiac sign
+ * @return int The sign number
+ */
 int get_sign_number(char *sign) {
     // Array of zodiac signs
     static char *signs[] = {"Ari", "Tau", "Gem", "Can", "Leo", "Vir", "Lib", "Sco", "Sag", "Cap", "Aqu", "Pis"};
@@ -105,7 +145,12 @@ int get_sign_number(char *sign) {
     return sign_num;
 }
 
-// Get Planet Name
+/**
+ * @brief Get the planet name based on the planet ID
+ *
+ * @param planet_id The planet ID
+ * @return char* The planet name
+ */
 char *get_planet_name(int planet_id) {
     // Array of planet names
     static char *planet_names[] = {"Sun",         "Moon",
@@ -124,12 +169,22 @@ char *get_planet_name(int planet_id) {
     return planet_names[planet_id];
 }
 
-// Check if is retrograde
-int is_retrograde(double pos, double abs_pos) {
-    return pos > abs_pos;
-}
+/**
+ * @brief Get the planet position within the zodiac sign
+ *
+ * @param pos The position of the planet
+ * @return double The planet position within the zodiac sign
+ */
+double get_planet_position(double pos) { return pos - (int)(pos / 30.0) * 30.0; }
 
-// Get Planet Data Structure
+/**
+ * @brief Get the planet data based on the planet ID, Julian Day, and flags
+ *
+ * @param planet_id The planet ID
+ * @param tjd_ut The Julian Day in Universal Time
+ * @param iflags The flags for the Swiss Ephemeris
+ * @return PlanetData* The planet data structure
+ */
 PlanetData *get_planet_data(int planet_id, double tjd_ut, int iflags) {
     // Dynamically allocate memory for the planet data structure
     PlanetData *planet = (PlanetData *)malloc(sizeof(PlanetData));
@@ -149,7 +204,7 @@ PlanetData *get_planet_data(int planet_id, double tjd_ut, int iflags) {
 
     // Set the position and absolute position in the structure
     planet->pos = xx[0];
-    planet->abs_pos = planet->pos + 60.0;
+    planet->abs_pos = get_planet_position(planet->pos);
 
     // Set the planet name in the structure
     strcpy(planet->name, get_planet_name(planet_id));
@@ -161,26 +216,19 @@ PlanetData *get_planet_data(int planet_id, double tjd_ut, int iflags) {
     strcpy(planet->quality, get_quality(planet->sign));
     strcpy(planet->element, get_element(planet->sign));
     strcpy(planet->house, get_house(planet->pos));
-    planet->retrograde = 0;
+    planet->retrograde = (int)xx[3];
 
     // Return the planet data structure
     return planet;
 }
+
 int main() {
     // Initialize the structure for the planet
     PlanetData planet;
 
-    double tjd_ut = 2451545.0;                // Julian Day for 2000-01-01 12:00:00 UTC (J2000)
-    int planet_id = SE_SUN;                   // Identifier for the Sun
+    double tjd_ut = 2441184.0;                // Julian Day for 2000-01-01 12:00:00 UTC (J2000)
+    int planet_id = SE_MERCURY;               // Identifier for the Sun
     int iflags = SEFLG_SWIEPH | SEFLG_HELCTR; // Swiss Ephemeris + heliocentric coordinates
-    double xx[6];                             // Array for planet coordinates
-    char serr[256];                           // Error buffer
-
-    // Call to Swiss Ephemeris to calculate the Sun's position
-    if (swe_calc_ut(tjd_ut, planet_id, iflags, xx, serr) == ERR) {
-        printf("Error: %s\n", serr);
-        return 1;
-    }
 
     planet = *get_planet_data(planet_id, tjd_ut, iflags);
 
