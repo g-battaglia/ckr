@@ -34,18 +34,33 @@ char *get_sign(double pos) {
 }
 
 /**
- * @brief Get the house number based on the position
+ * @brief Get the house number based on the position and house cusps
  *
  * @param pos The position of the planet
+ * @param houses_cusps The house cusps
  * @return char* The house number
  */
-char *get_house(double pos) {
-    // Array of house numbers
-    static char *houses[] = {"First_House", "Second_House", "Third_House",    "Fourth_House",
-                             "Fifth_House", "Sixth_House",  "Seventh_House",  "Eighth_House",
-                             "Ninth_House", "Tenth_House",  "Eleventh_House", "Twelfth_House"};
+/**
+ * @brief Get the house number based on the position and house cusps
+ *
+ * @param pos The position of the planet
+ * @param house_cusps The house cusps
+ * @return char* The house number
+ */
+char *get_house(double pos, const double house_cusps[12]) {
+    static char *houses[] = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"};
+    int house_num = 0;
 
-    const int house_num = (int)(pos / 30.0);
+    for (int i = 0; i < 12; i++) {
+        if (pos < house_cusps[i]) {
+            house_num = i;
+            break;
+        }
+    }
+
+    if (pos >= house_cusps[11]) {
+        house_num = 0;
+    }
 
     return houses[house_num];
 }
@@ -157,11 +172,13 @@ double get_planet_position(double pos) { return pos - (int)(pos / 30.0) * 30.0; 
  * @brief Get the planet data based on the planet ID, Julian Day, and flags
  *
  * @param planet_id The planet ID
+ * @param houses_cusps The house cusps
  * @param tjd_ut The Julian Day in Universal Time
  * @param iflags The flags for the Swiss Ephemeris
  * @return PlanetData* The planet data structure
  */
-PlanetData *get_planet_data(int planet_id, double tjd_ut, int iflags) {
+PlanetData *get_planet_data(int planet_id, double houses_cusps[12], double tjd_ut, int iflags) {
+
     // Dynamically allocate memory for the planet data structure
     PlanetData *planet = (PlanetData *)malloc(sizeof(PlanetData));
 
@@ -185,14 +202,13 @@ PlanetData *get_planet_data(int planet_id, double tjd_ut, int iflags) {
     planet->abs_pos = get_planet_position(planet->pos);
     planet->retrograde = (int)xx[3];
 
-
     // Set the sign, sign number, emoji, quality, element, house, and retrograde in the structure
     strcpy(planet->sign, get_sign(planet->pos));
     planet->sign_num = get_sign_number(planet->sign);
     strcpy(planet->emoji, get_emoji(planet->sign));
     strcpy(planet->quality, get_quality(planet->sign));
     strcpy(planet->element, get_element(planet->sign));
-    strcpy(planet->house, get_house(planet->pos));
+    strcpy(planet->house, get_house(planet->pos, houses_cusps));
 
     // Return the planet data structure
     return planet;
@@ -203,12 +219,26 @@ int main() {
     double tjd_ut = 2441184.0;                // Julian Day for 2000-01-01 12:00:00 UTC (J2000)
     int iflags = SEFLG_SWIEPH | SEFLG_HELCTR; // Swiss Ephemeris + heliocentric coordinate
 
+    // Longitude and latitude of the observer, Milan, Italy
+    double geolon = 9.19;
+    double geolat = 45.47;
+
     printf("Planet Data for Julian Day %.15f\n\n", tjd_ut);
+
+    // House array with houses
+    double houses_cusps[12];
+    double ascmc[10];
+    char serr[256]; // Error buffer
+
+    if (swe_houses(tjd_ut, geolon, geolat, 'P', houses_cusps, ascmc) == ERR) {
+        printf("Error: %s\n", serr);
+        return 1; // Exit the program if there is an error
+    }
 
     // For i from 0 to 14
     for (int i = 0; i < 15; i++) {
         // Get the planet data based on the planet ID, Julian Day, and flags
-        PlanetData *planet = get_planet_data(i, tjd_ut, iflags);
+        PlanetData *planet = get_planet_data(i, houses_cusps, tjd_ut, iflags);
 
         if (planet != NULL) {
             // Output the planet data in human-readable format
@@ -229,9 +259,10 @@ int main() {
             free(planet);
         }
     }
-
+    
     // Close Swiss Ephemeris
     swe_close();
 
+    printf("Swiss Ephemeris has been closed.\n");
     return 0;
 }
