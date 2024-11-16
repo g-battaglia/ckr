@@ -27,7 +27,7 @@ char *get_sign(double pos) {
     static char *signs[] = {"Ari", "Tau", "Gem", "Can", "Leo", "Vir", "Lib", "Sco", "Sag", "Cap", "Aqu", "Pis"};
 
     // Calculate the sign number
-    int sign_num = (int)(pos / 30.0);
+    const int sign_num = (int)(pos / 30.0);
 
     // Return the sign based on the sign number
     return signs[sign_num];
@@ -36,29 +36,29 @@ char *get_sign(double pos) {
 /**
  * @brief Get the house number based on the position and house cusps
  *
- * @param pos The position of the planet
+ * @param position The position of the planet
  * @param houses_cusps The house cusps
  * @return char* The house number
  */
 /**
  * @brief Get the house number based on the position and house cusps
  *
- * @param pos The position of the planet
- * @param house_cusps The house cusps
+ * @param position The position of the planet
+ * @param houses_cusps The house cusps
  * @return char* The house number
  */
-char *get_house(double pos, const double house_cusps[12]) {
+char *get_house(double position, const double houses_cusps[12]) {
     static char *houses[] = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"};
     int house_num = 0;
 
     for (int i = 0; i < 12; i++) {
-        if (pos < house_cusps[i]) {
+        if (position < houses_cusps[i]) {
             house_num = i;
             break;
         }
     }
 
-    if (pos >= house_cusps[11]) {
+    if (position >= houses_cusps[11]) {
         house_num = 0;
     }
 
@@ -215,30 +215,52 @@ PlanetData *get_planet_data(int planet_id, double houses_cusps[12], double tjd_u
 }
 
 int main() {
+    // Set a date UTC date and convert it to Julian Day with swe_utc_to_jd
+
+    int year = 2021;
+    int month = 2;
+    int day = 1;
+    int hour = 12;
+    int minute = 0;
+    int second = 0;
+
+    double julian_day;
+    swe_utc_to_jd(year, month, day, hour, minute, second, 1, &julian_day, NULL);
+
     // Initialize the structure for the planet
-    double tjd_ut = 2441184.0;                // Julian Day for 2000-01-01 12:00:00 UTC (J2000)
     int iflags = SEFLG_SWIEPH | SEFLG_HELCTR; // Swiss Ephemeris + heliocentric coordinate
 
     // Longitude and latitude of the observer, Milan, Italy
     double geolon = 9.19;
     double geolat = 45.47;
 
-    printf("Planet Data for Julian Day %.15f\n\n", tjd_ut);
+    printf("Planet Data for Julian Day %.15f\n\n", julian_day);
 
     // House array with houses
-    double houses_cusps[12];
-    double ascmc[10];
+    double houses_cusps[13];
+    double house_custs_real[12];
+    double ascmc[8];
     char serr[256]; // Error buffer
 
-    if (swe_houses(tjd_ut, geolon, geolat, 'P', houses_cusps, ascmc) == ERR) {
+    if (swe_houses(julian_day, geolon, geolat, 'P', houses_cusps, ascmc) == ERR) {
         printf("Error: %s\n", serr);
         return 1; // Exit the program if there is an error
     }
 
+    // Remove the element at index 0 and make it of 12 elements
+    for (int i = 0; i < 12; i++) {
+        house_custs_real[i] = houses_cusps[i + 1];
+    }
+
+    printf("House Cusps:\n");
+    for (int i = 0; i < 13; i++) {
+        printf("House %d: %.15f\n", i, house_custs_real[i]);
+    }
+
     // For i from 0 to 14
-    for (int i = 0; i < 15; i++) {
+    for (int i = 15; i > -1; i--) {
         // Get the planet data based on the planet ID, Julian Day, and flags
-        PlanetData *planet = get_planet_data(i, houses_cusps, tjd_ut, iflags);
+        PlanetData *planet = get_planet_data(i, house_custs_real, julian_day, iflags);
 
         if (planet != NULL) {
             // Output the planet data in human-readable format
@@ -259,7 +281,7 @@ int main() {
             free(planet);
         }
     }
-    
+
     // Close Swiss Ephemeris
     swe_close();
 
